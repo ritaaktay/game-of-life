@@ -1,0 +1,127 @@
+<div id="grid"></div>
+<button id="next">Next</button>
+<button id="run">Auto</button>
+
+<script>
+  //the table containing cells is placed inside div element id #grid
+  const grid = document.querySelector("#grid");
+  const size = 20;
+  const possibility = 0.2; 
+  
+  //generation is a two dimensional array that stores cells as booleans
+  let generation = [];
+  let table = document.createElement("table")
+  
+  //takes two arguments, size and possibility, and generates a random starting grid
+  function random(size, possibility) {
+    for (let r=0; r<size; r++) {
+      let row = []; 
+      for (let c=0; c<size; c++) {
+        let cell = Math.random() < possibility ? true : false ;
+        row.push(cell);
+      }
+      generation[r] = row;
+    }
+  }
+  
+  random(size, possibility);
+  
+  //displays two dimensional matrix as checkboxes in an html table 
+  //checked for ture cells (alive), unchecked for false cells (dead)
+  //gives the <tr> tags (rows) index attribute containing index of outer array
+  //and <td> tags (cells) index attribute cointatining index of inner array 
+  //these are used in the event handler for clicks to sync data with display
+
+  function display(generation) { 
+    for (let r=0; r<size; r++) {
+      let row = document.createElement("tr");
+      row.index = r
+      for (let c=0; c<size; c++) {
+        let cell = document.createElement("td");
+        cell.index = c;
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox", checkbox.checked = generation[r][c]
+        cell.appendChild(checkbox);
+        row.appendChild(cell); 
+      }
+      table.appendChild(row);
+    }
+    grid.appendChild(table);
+  }
+  
+  display(generation); 
+  
+  //event handler for checkbox clicks uses the index attributes to access
+  //corresponding index in two dimensional generation array and change
+  //value of cell
+  //event.target is the input element containing checked information
+  //the first parent is <td> with cell index and 
+  //second parent is <tr> with row index 
+
+  document.querySelectorAll("input").forEach(checkbox => {
+      checkbox.addEventListener("change", event => {
+        let row = event.target.parentElement.parentElement.index
+        let cell = event.target.parentElement.index
+        generation[row][cell] = event.target.checked;
+        console.log(generation);
+      })
+  });
+  
+  //computes a next generation from a given generation and ammends checkboxes 
+  //in the table DOM element
+  //loops through each cell in the two dimensional array
+  //loops through neighbours of each cell to count live ones
+  //changes status of cell and checkbox based on neighbour count
+  //checkbox is accessed as the index of child in children array 
+  //children of <table> contaion <tr> tags, children of <tr> tags contain <td>
+  //tags and first children of <td> tags contain the <input> checkbox
+  //it loops through generation, whilst modifying a copy (newGeneration),
+  //and replaces generation with modified copy after loop
+
+
+  function next() {
+    let newGeneration = generation;
+    for (let r=0; r<size; r++) {
+      for (let c=0; c<size; c++) {
+        let cell = generation[r][c];
+        let neighbours = 0;
+        for (let r1=Math.max(0, r-1); r1<=Math.min(size-1, r+1); r1++) {
+          for (let c1=Math.max(0, c-1); c1<=Math.min(size-1, c+1); c1++) {
+            if ((r1 != r || c1 != c) && generation[r1][c1]) neighbours++;
+          }
+        }
+        if (cell == true) {
+          if (neighbours < 2 || neighbours > 3) {
+            newGeneration[r][c] = false;
+            table.children[r].children[c].firstChild.checked = false;
+          }
+        } else {
+          if (neighbours == 3) {
+            newGeneration[r][c] = true;
+            table.children[r].children[c].firstChild.checked = true;
+          }
+        }
+      }
+    }
+    generation = newGeneration;
+  }
+  
+  //adds next function as event handler for next button clicks
+  document.querySelector("#next").addEventListener("click",next);
+          
+  //adds event handler to auto button that calls next function every 400 ms
+  //the button can be pressed again to pause, and this is done by having 
+  //a running binding that contains null if paused and setInterval function if running
+  //this clearInterval can also be called on the running binding
+  let running = null;
+  document.querySelector("#run").addEventListener("click", () => {
+    if (running) {
+      clearInterval(running);
+      running = null;
+    } else {
+      running = setInterval(next, 400);
+    }
+  });
+</script>
+
+
