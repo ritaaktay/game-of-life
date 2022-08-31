@@ -20,7 +20,7 @@ The code includes step-by-step comments to explain how things work.
 
 # Play around
 Manually change the configuration of checkboxes in your browser by clicking/unclicking.\
-Play with ```const size = 20``` and ```const possibility = 0.2``` in the script to change random starting generation.\
+Play with ```const size = 20``` and ```const possibility = 0.2``` in the script to change random starting generation.
 
 # Credits
 This was coded as part of an exercise in Marijn Haverbeke's brilliant book [Eloquent Javascript](https://eloquentjavascript.net/)
